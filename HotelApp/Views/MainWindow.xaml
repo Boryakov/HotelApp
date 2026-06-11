@@ -39,6 +39,7 @@
                         <TextBlock Text="Total Number of Rooms:" Margin="0,0,0,5" Foreground="#555555" FontWeight="Normal"/>
                         <TextBox Name="txtTotalRooms" Text="20" Padding="4" Margin="0,0,0,8" FontWeight="Normal"/>
                         <Button Name="btnInitialize" Content="Initialize Hotel Fund" Padding="6" Margin="0,0,0,6" Background="#007ACC" Foreground="White"/>
+                        <Button Name="btnOpenRoomCreation" Content="Add Single New Room..." Padding="6" Margin="0,0,0,6" Background="#007ACC" Foreground="White"/>
                         <Button Name="btnGenerateData" Content="Mock Random Guests" Padding="6" Background="#E1DFDD" FontWeight="Normal"/>
                     </StackPanel>
                 </GroupBox>

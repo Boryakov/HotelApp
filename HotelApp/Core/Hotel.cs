@@ -28,13 +28,11 @@ namespace HotelApp.Core
         public Hotel(int totalRooms)
         {
             rooms = new List<Room>();
-            Random rand = new Random();
 
             for (int i = 1; i <= totalRooms; i++)
             {
-                // Generate a random class allocation (Standard, JuniorSuite, or Suite)
-                RoomClass allocatedClass = (RoomClass)rand.Next(0, 3);
-                rooms.Add(new Room(100 + i, allocatedClass)); // Generates sequential room numbers like 101, 102, etc.
+                // All rooms are strictly instantiated as RoomClass.Standard by default
+                rooms.Add(new Room(101 + i, RoomClass.Standard));
             }
         }
 

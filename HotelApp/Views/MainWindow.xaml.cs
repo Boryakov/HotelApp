@@ -25,6 +25,7 @@ namespace HotelApp.Views
             btnGenerateData.Click += BtnGenerateData_Click;
             btnOpenCheckIn.Click += BtnOpenCheckIn_Click;
             btnCheckOut.Click += BtnCheckOut_Click;
+            btnOpenRoomCreation.Click += BtnOpenRoomCreation_Click;
 
             // System file persistence configurations
             menuOpen.Click += MenuOpen_Click;
@@ -155,6 +156,35 @@ namespace HotelApp.Views
             catch (HotelException ex)
             {
                 MessageBox.Show(ex.Message, "Business Logic Constraint", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void BtnOpenRoomCreation_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 1. Validate if the hotel core business engine is initialized properly
+                if (hotelEngine == null)
+                {
+                    throw new HotelException("Operation denied: The hotel database fund is not initialized. Please configure the fund or import a file first.");
+                }
+
+                // 2. Instantiate and show the custom creation window dialog
+                RoomCreationWindow dialog = new RoomCreationWindow();
+                dialog.Owner = this; // Maintain proper window layering hierarchy
+
+                // 3. Catch when the administrator submits valid form parameters
+                if (dialog.ShowDialog() == true)
+                {
+                    // Temporarily display captured values to verify UI interaction integrity
+                    MessageBox.Show($"Captured Data Successfully!\nRoom: {dialog.CreatedRoomNumber}\nClass: {dialog.CreatedRoomClass}",
+                                    "Debug Status Trace", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (HotelException ex)
+            {
+                // Display user-friendly runtime constraint alerts
+                MessageBox.Show(ex.Message, "Action Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
