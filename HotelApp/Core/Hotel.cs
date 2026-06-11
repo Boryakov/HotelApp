@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-
 using HotelApp.Models;
 
 namespace HotelApp.Core
@@ -16,6 +15,7 @@ namespace HotelApp.Core
         public List<Room> Rooms
         {
             get { return rooms; }
+            set { rooms = value; }
         }
 
         // Default constructor initializing an empty room roster
@@ -24,15 +24,66 @@ namespace HotelApp.Core
             rooms = new List<Room>();
         }
 
-        // Parameterized constructor creating a predefined set of rooms with randomized classes
+        // Parameterized constructor creating a predefined set of rooms
         public Hotel(int totalRooms)
         {
             rooms = new List<Room>();
 
-            for (int i = 1; i <= totalRooms; i++)
+            for (int i = 0; i < totalRooms; i++)
             {
                 // All rooms are strictly instantiated as RoomClass.Standard by default
                 rooms.Add(new Room(101 + i, RoomClass.Standard));
+            }
+        }
+
+        // Registers a unique custom room configuration to the existing database fund
+        public void AddCustomRoom(int number, RoomClass roomClass)
+        {
+            // Validate identifier collision within the master list collection
+            if (rooms.Exists(r => r.Number == number))
+            {
+                throw new HotelException($"Configuration constraint: Room number {number} already exists in the database fund.");
+            }
+
+            // Append the new customized room instance to the collection
+            rooms.Add(new Room(number, roomClass));
+        }
+
+        public string ToJsonString()
+        {
+            var executionOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true // Formats the file layout beautifully for human reading
+            };
+            return JsonSerializer.Serialize(this.rooms, executionOptions);
+        }
+
+        // CORE UPGRADE: Parses structured JSON back into a valid operational Hotel collection entity
+        public static Hotel FromJsonString(string jsonContent)
+        {
+            try
+            {
+                var processingOptions = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true // Protects against minor case mismatches
+                };
+
+                List<Room> extractedRooms = JsonSerializer.Deserialize<List<Room>>(jsonContent, processingOptions);
+
+                if (extractedRooms == null || extractedRooms.Count == 0)
+                {
+                    throw new HotelException("Import aborted: Provided file does not contain valid structured matrix layout.");
+                }
+
+                // Create a temporary instance to restore application state metrics
+                Hotel fullyLoadedHotel = new Hotel();
+                fullyLoadedHotel.Rooms = extractedRooms;
+
+                return fullyLoadedHotel;
+            }
+            catch (Exception ex) when (!(ex is HotelException))
+            {
+                throw new HotelException($"Deserialization integrity failure: Processing sequence broke down. Details: {ex.Message}");
             }
         }
 
@@ -104,66 +155,6 @@ namespace HotelApp.Core
             reportBuilder.AppendLine($"Total records listed based on current view criteria: {displayedCount}");
 
             return reportBuilder.ToString();
-        }
-
-        // Static parser engine to reconstitute a Hotel data model object from a structured log text file
-        public static Hotel FromTextFile(string fileContent)
-        {
-            string[] textLines = fileContent.Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (textLines.Length < 4)
-            {
-                throw new HotelException("Parsing error: The source file is corrupted or has an invalid template structure.");
-            }
-
-            Hotel parsedHotel = new Hotel();
-            bool isDataSectionReached = false;
-
-            foreach (var line in textLines)
-            {
-                if (line.Contains("Room Num"))
-                {
-                    isDataSectionReached = true;
-                    continue;
-                }
-
-                // End processing if boundary indicator or final footer summaries are reached
-                if (line.Contains("====") && isDataSectionReached && parsedHotel.Rooms.Count > 0)
-                {
-                    break;
-                }
-
-                if (isDataSectionReached && line.Contains("|"))
-                {
-                    string[] splitDataParts = line.Split('|');
-                    if (splitDataParts.Length < 4) continue;
-
-                    int number = Convert.ToInt32(splitDataParts[0].Trim());
-                    string classString = splitDataParts[1].Trim();
-                    string statusString = splitDataParts[2].Trim();
-                    string guest = splitDataParts[3].Trim();
-
-                    // Map string back to RoomClass enum value
-                    RoomClass parsedClass = (RoomClass)Enum.Parse(typeof(RoomClass), classString);
-
-                    Room reconstructedRoom = new Room(number, parsedClass);
-
-                    if (statusString == "Occupied")
-                    {
-                        reconstructedRoom.IsOccupied = true;
-                        reconstructedRoom.GuestName = (guest == "-") ? "Unknown Resident" : guest;
-                    }
-
-                    parsedHotel.Rooms.Add(reconstructedRoom);
-                }
-            }
-
-            if (parsedHotel.Rooms.Count == 0)
-            {
-                throw new HotelException("Parsing error: Unable to identify or reconstruct any valid room entries. Schema verification failed.");
-            }
-
-            return parsedHotel;
         }
 
         // Class destructor releasing the inner list memory block

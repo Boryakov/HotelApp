@@ -197,20 +197,22 @@ namespace HotelApp.Views
             }
 
             SaveFileDialog saveDialog = new SaveFileDialog();
-            saveDialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
+            saveDialog.Filter = "JSON Data Files (*.json)|*.json|All Files (*.*)|*.*"; // Target structured JSON extensions
             saveDialog.Title = "Save Current Hotel Status Log Report";
 
             if (saveDialog.ShowDialog() == true)
             {
                 try
                 {
-                    string layoutReportText = hotelEngine.PrintReport(0); // System saves full state metrics layout logs
-                    File.WriteAllText(saveDialog.FileName, layoutReportText);
-                    MessageBox.Show("Hotel fund state matrix log compiled and saved successfully.", "System Backup Status", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Serialize system allocation rows into JSON format string
+                    string jsonOutputText = hotelEngine.ToJsonString();
+                    File.WriteAllText(saveDialog.FileName, jsonOutputText);
+
+                    MessageBox.Show("Hotel current report file compiled and saved as JSON successfully.", "Data Backup", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"File system streaming error: {ex.Message}", "IO Exception Signal", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"File operation execution failure: {ex.Message}", "IO Stream System Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -218,22 +220,25 @@ namespace HotelApp.Views
         private void MenuOpen_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openDialog = new OpenFileDialog();
-            openDialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
+            openDialog.Filter = "JSON Data Files (*.json)|*.json|All Files (*.*)|*.*"; // Target structured JSON extensions
             openDialog.Title = "Import Existing Hotel Database State Log File";
 
             if (openDialog.ShowDialog() == true)
             {
                 try
                 {
-                    string loggingTextStream = File.ReadAllText(openDialog.FileName);
-                    hotelEngine = Hotel.FromTextFile(loggingTextStream);
+                    string loadedJsonContent = File.ReadAllText(openDialog.FileName);
 
-                    UpdateFilterMode(0); // Standardize system display grid layout matrix back to full report view
-                    MessageBox.Show("Hotel database allocation recovered and synchronized from file source logs.", "Data Integration Finished", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Reconstruct core business state directly from the selected file stream
+                    hotelEngine = Hotel.FromJsonString(loadedJsonContent);
+
+                    UpdateFilterMode(0); // Standardize system display grid layout matrix back to full view
+                    RefreshConsoleDisplay();
+                    MessageBox.Show("Hotel status configuration recovered and synchronized from JSON source data.", "Data Import", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Parsing process sequence crash: {ex.Message}", "Deserialization Integrity Failure", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Parsing procedure aborted: {ex.Message}", "File Deserialization Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
