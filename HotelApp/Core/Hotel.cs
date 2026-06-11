@@ -126,35 +126,22 @@ namespace HotelApp.Core
             targetRoom.IsOccupied = false;
             targetRoom.GuestName = string.Empty;
         }
-
-        // Formats and builds a comprehensive tabular report of the room statuses based on view filters
-        // Mode options: 0 - Display All Rooms, 1 - Display Vacant Only, 2 - Display Occupied Only
-        public string PrintReport(int displayMode = 0)
+        public void UpdateRoomDetails(int roomNumber, RoomClass newClass, bool isOccupied, string guestName)
         {
-            StringBuilder reportBuilder = new StringBuilder();
-            reportBuilder.AppendLine("===============================================================================");
-            reportBuilder.AppendLine("   Room Num   |      Comfort Class      |     Status     |      Current Guest    ");
-            reportBuilder.AppendLine("===============================================================================");
+            Room room = rooms.Find(r => r.Number == roomNumber);
+            if (room == null) throw new HotelException($"Target room record matching key '{roomNumber}' was not resolved.");
 
-            int displayedCount = 0;
+            room.Class = newClass;
+            room.IsOccupied = isOccupied;
+            room.GuestName = isOccupied ? guestName : "";
+        }
 
-            foreach (var room in rooms)
-            {
-                // Filter handling matching the current UI selected view mode
-                if (displayMode == 1 && room.IsOccupied) continue;
-                if (displayMode == 2 && !room.IsOccupied) continue;
+        public void DeleteRoom(int roomNumber)
+        {
+            Room room = rooms.Find(r => r.Number == roomNumber);
+            if (room == null) throw new HotelException($"Deletion aborted: Target room entity identifier matching key '{roomNumber}' was not resolved.");
 
-                string statusText = room.IsOccupied ? "Occupied" : "Vacant";
-                string residentName = room.IsOccupied ? room.GuestName : "-";
-
-                reportBuilder.AppendLine($"{room.Number,12}   | {room.Class,-23} | {statusText,-14} | {residentName}");
-                displayedCount++;
-            }
-
-            reportBuilder.AppendLine("===============================================================================");
-            reportBuilder.AppendLine($"Total records listed based on current view criteria: {displayedCount}");
-
-            return reportBuilder.ToString();
+            rooms.Remove(room);
         }
 
         // Class destructor releasing the inner list memory block

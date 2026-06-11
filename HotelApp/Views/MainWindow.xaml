@@ -74,15 +74,16 @@
                 <TextBlock Grid.Row="0" Text="Live Database Registry Grid:" VerticalAlignment="Center" Margin="0,0,0,8" FontWeight="SemiBold" Foreground="#333333"/>
 
                 <DataGrid Grid.Row="1" Name="dgRoomRegistry" 
-              AutoGenerateColumns="False" 
-              IsReadOnly="True" 
-              SelectionMode="Single"
-              SelectionUnit="FullRow"
-              GridLinesVisibility="Horizontal" 
-              HeadersVisibility="Column"
-              Background="White" 
-              BorderBrush="#E1DFDD" 
-              RowHeight="28">
+                  AutoGenerateColumns="False" 
+                  IsReadOnly="True" 
+                  SelectionMode="Single"
+                  SelectionUnit="FullRow"
+                  GridLinesVisibility="Horizontal" 
+                  HeadersVisibility="Column"
+                  Background="White" 
+                  BorderBrush="#E1DFDD" 
+                  RowHeight="28"
+                  MouseDoubleClick="DgRoomRegistry_MouseDoubleClick">
 
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="DataGridColumnHeader">

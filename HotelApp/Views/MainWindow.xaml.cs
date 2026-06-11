@@ -263,6 +263,50 @@ namespace HotelApp.Views
                 }
             }
         }
+        // CORE UPGRADE: Fully interactive double-click grid layout workflow controller routine
+        private void DgRoomRegistry_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            // 1. Resolve selected row data row object schema reference mapping from grid matrix view
+            var selectedRoom = dgRoomRegistry.SelectedItem as HotelApp.Models.Room;
+            if (selectedRoom == null) return; // Prevent operational failure loops if user hits empty layout nodes
 
+            // 2. Initialize and construct structural layout overlay data dialog form
+            RoomDetailsWindow detailsWindow = new RoomDetailsWindow(selectedRoom);
+            detailsWindow.Owner = this; // Enforce center tracking parent layout constraints
+
+            // 3. Catch structural affirmative updates upon operational dialog closing state sequence
+            if (detailsWindow.ShowDialog() == true)
+            {
+                try
+                {
+                    if (detailsWindow.IsDeleteRequested)
+                    {
+                        // Trigger deletion execution stream sequence
+                        hotelEngine.DeleteRoom(selectedRoom.Number);
+                        RefreshConsoleDisplay();
+
+                        MessageBox.Show($"Room {selectedRoom.Number} successfully deleted and purged from the asset list index.",
+                                        "Operation Completed", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        // Execute internal parameters database synchronization transaction metrics
+                        hotelEngine.UpdateRoomDetails(selectedRoom.Number,
+                                                     detailsWindow.UpdatedClass,
+                                                     detailsWindow.UpdatedIsOccupied,
+                                                     detailsWindow.UpdatedGuestName);
+                        RefreshConsoleDisplay();
+
+                        MessageBox.Show($"Room dataset records for Room {selectedRoom.Number} synchronized and verified successfully.",
+                                        "Operation Completed", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                catch (HotelException ex)
+                {
+                    // Catch custom exceptions thrown by business processing verification framework layers
+                    MessageBox.Show(ex.Message, "Business Rule Violation Failure", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+        }
     }
 }
