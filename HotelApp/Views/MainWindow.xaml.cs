@@ -40,12 +40,28 @@ namespace HotelApp.Views
 
         private void RefreshConsoleDisplay()
         {
+            // 1. If the database engine is not active, clear the table grid and exit
             if (hotelEngine == null)
             {
-                txtConsoleMonitor.Text = "System idle. Please initialize the hotel fund database or import a configuration.";
+                dgRoomRegistry.ItemsSource = null;
                 return;
             }
-            txtConsoleMonitor.Text = hotelEngine.PrintReport(currentFilterMode);
+
+            // 2. Filter the rooms collection dynamically based on the current UI filter state
+            // Mode indicators: 0 = Display All, 1 = Vacant Only, 2 = Occupied Only
+            var filteredRooms = hotelEngine.Rooms.FindAll(room =>
+            {
+                if (currentFilterMode == 1 && room.IsOccupied) return false;
+                if (currentFilterMode == 2 && !room.IsOccupied) return false;
+                return true;
+            });
+
+            // 3. Sort the filtered collection by Room Number ascending before projection
+            var sortedRooms = filteredRooms.OrderBy(room => room.Number).ToList();
+
+            // 4. Bind the fresh sorted collection directly to the DataGrid item source
+            dgRoomRegistry.ItemsSource = null;
+            dgRoomRegistry.ItemsSource = sortedRooms;
         }
 
         private void UpdateFilterMode(int mode)
@@ -169,21 +185,26 @@ namespace HotelApp.Views
                     throw new HotelException("Operation denied: The hotel database fund is not initialized. Please configure the fund or import a file first.");
                 }
 
-                // 2. Instantiate and show the custom creation window dialog
+                // 2. Instantiate and show the custom creation window dialog layout
                 RoomCreationWindow dialog = new RoomCreationWindow();
-                dialog.Owner = this; // Maintain proper window layering hierarchy
+                dialog.Owner = this; // Set parent center alignment behavior
 
-                // 3. Catch when the administrator submits valid form parameters
+                // 3. Catch when the admin user triggers the affirmative registration option
                 if (dialog.ShowDialog() == true)
                 {
-                    // Temporarily display captured values to verify UI interaction integrity
-                    MessageBox.Show($"Captured Data Successfully!\nRoom: {dialog.CreatedRoomNumber}\nClass: {dialog.CreatedRoomClass}",
-                                    "Debug Status Trace", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // 4. Inject the custom room parameters directly into the hotel engine collection
+                    hotelEngine.AddCustomRoom(dialog.CreatedRoomNumber, dialog.CreatedRoomClass);
+
+                    // 5. Refresh the current console report screen to project updates immediately
+                    RefreshConsoleDisplay();
+
+                    MessageBox.Show($"Room {dialog.CreatedRoomNumber} ({dialog.CreatedRoomClass}) successfully added to the fund.",
+                                    "Operation Completed", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (HotelException ex)
             {
-                // Display user-friendly runtime constraint alerts
+                // Display user-friendly business logic constraint alerts
                 MessageBox.Show(ex.Message, "Action Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
@@ -242,5 +263,6 @@ namespace HotelApp.Views
                 }
             }
         }
+
     }
 }

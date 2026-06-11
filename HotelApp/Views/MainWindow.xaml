@@ -4,8 +4,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HotelApp.Views"
+        xmlns:core="clr-namespace:HotelApp.Core"
+        
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+
+    <Window.Resources>
+        <core:BooleanToStatusConverter x:Key="BooleanToStatusConverter"/>
+        <core:BooleanToColorConverter x:Key="BooleanToColorConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -58,18 +65,53 @@
 
             </StackPanel>
 
-            <Grid Grid.Column="1">
+            <Grid Grid.Column="1" Margin="12,0,0,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="Live Database Console Monitor:" Margin="0,0,0,5" FontWeight="SemiBold" Foreground="#333333"/>
-                <TextBox Grid.Row="1" Name="txtConsoleMonitor" 
-                         FontFamily="Consolas" FontSize="12.5" 
-                         AcceptsReturn="True" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                         IsReadOnly="True" Background="#FFFFFF" Foreground="#1E1E1E" Padding="10"
-                         Text="System idle. Please initialize the hotel fund or open an existing file configuration to display data."/>
+                <TextBlock Grid.Row="0" Text="Live Database Registry Grid:" VerticalAlignment="Center" Margin="0,0,0,8" FontWeight="SemiBold" Foreground="#333333"/>
+
+                <DataGrid Grid.Row="1" Name="dgRoomRegistry" 
+              AutoGenerateColumns="False" 
+              IsReadOnly="True" 
+              SelectionMode="Single"
+              SelectionUnit="FullRow"
+              GridLinesVisibility="Horizontal" 
+              HeadersVisibility="Column"
+              Background="White" 
+              BorderBrush="#E1DFDD" 
+              RowHeight="28">
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#F3F2F1"/>
+                            <Setter Property="Foreground" Value="#333333"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="8,4,8,4"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#E1DFDD"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Room Number" Binding="{Binding Number}" Width="110"/>
+                        <DataGridTextColumn Header="Comfort Class" Binding="{Binding Class}" Width="140"/>
+
+                        <DataGridTemplateColumn Header="Status" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding IsOccupied, Converter={StaticResource BooleanToStatusConverter}}" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{Binding IsOccupied, Converter={StaticResource BooleanToColorConverter}}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="Current Occupant Full Name" Binding="{Binding GuestName}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
         </Grid>
     </Grid>
